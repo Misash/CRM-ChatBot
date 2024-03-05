@@ -2,23 +2,47 @@
 from dotenv import load_dotenv,find_dotenv
 load_dotenv(find_dotenv())
 
-# import schema for chat messages and ChatOpenAI in order to query chatmodels GPT models
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAI
 
-from langchain.schema import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage
+#defining LLm model
+llm = OpenAI()
+chat_model = ChatOpenAI(model="gpt-3.5-turbo-0125")
+
+ 
+from langchain.prompts.chat import ChatPromptTemplate
+
+
+# template for CRM sales assistant
+crm_template = (
+    """ You are an expert sales assistant specialized in WhatsApp interactions. 
+    You understand the nuances of customer communication and are skilled in providing 
+    product information, answering queries, and guiding customers through the purchasing 
+    process. Your advice is based on the latest sales strategies and CRM best practices."""
 )
-from langchain.chat_models import ChatOpenAI
-     
 
-chat = ChatOpenAI(model_name="gpt-3.5-turbo",temperature=0.3)
+human_template = (
+    """ Customer Inquiry: {customer_inquiry} Provide a detailed response that guides the 
+    customer through their query, offers relevant product information, and encourages a 
+    "positive sales outcome."""
+)
 
-messages = [
-    SystemMessage(content="You are an expert data scientist"), # context
-    HumanMessage(content="Write a Python script that trains a neural network on simulated data ")
-]
+chat_prompt = ChatPromptTemplate.from_messages([
+    ("system", crm_template),
+    ("human", human_template),
+])
 
-response=chat(messages)
+# llm chain
+from langchain.chains import LLMChain
+chain = LLMChain(llm=llm, prompt=chat_prompt)
 
-print(response.content,end='\n')
+
+# response 
+response = chain.invoke({
+    "customer_inquiry": "Can you tell me more about the features of your latest product?"
+})
+
+print(response['text'])
+
+
+

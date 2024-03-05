@@ -22,9 +22,9 @@ crm_template = (
 )
 
 human_template = (
-    """ Customer Inquiry: {customer_inquiry} Provide a detailed response that guides the 
+    """ Customer Inquiry: {customer_inquiry} Provide a concise response that guides the 
     customer through their query, offers relevant product information, and encourages a 
-    "positive sales outcome."""
+    positive sales outcome."""
 )
 
 chat_prompt = ChatPromptTemplate.from_messages([
@@ -38,11 +38,11 @@ chain = LLMChain(llm=llm, prompt=chat_prompt)
 
 
 # response 
-response = chain.invoke({
-    "customer_inquiry": "Can you tell me more about the features of your latest product?"
-})
+# response = chain.invoke({
+#     "customer_inquiry": "Can you tell me more about the features of your latest product?"
+# })
 
-print(response['text'])
+# print(response['text'])
 
 # Embeddings and Vector Stores
 from langchain_community.document_loaders import TextLoader
@@ -78,3 +78,25 @@ docsearch = PineconeVectorStore.from_documents(docs, embeddings, index_name=inde
 # print(result [0].page_content)
 
 
+def answer_question(question):
+    #find relevant content on vector emdeddings
+    search_result = docsearch.similarity_search(question)
+    relevant_content = search_result[0].page_content
+    
+    # concatenate revelant content with crm_template
+    response_prompt = f"""
+    {crm_template}
+    
+    Customer Inquiry: {question}
+    
+    Based on the following information: {relevant_content}
+    """
+    
+    response = chain.invoke({"customer_inquiry": response_prompt})
+    
+    return response['text']
+
+# Example usage
+question = "What products do you have?"
+response = answer_question(question)
+print(response)

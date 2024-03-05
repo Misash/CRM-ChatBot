@@ -38,11 +38,11 @@ chain = LLMChain(llm=llm, prompt=chat_prompt)
 
 
 # response 
-# response = chain.invoke({
-#     "customer_inquiry": "Can you tell me more about the features of your latest product?"
-# })
+response = chain.invoke({
+    "customer_inquiry": "Can you tell me more about the features of your latest product?"
+})
 
-# print(response['text'])
+print(response['text'])
 
 # Embeddings and Vector Stores
 from langchain_community.document_loaders import TextLoader
@@ -60,21 +60,21 @@ docs = text_splitter.split_documents(documents)
 # for i in range(len(docs)):
 #     print(f"CHUNK {i}:\n\n", docs[i].page_content)
 
+
 #turn the chunks on embeddings
 embeddings = OpenAIEmbeddings()
 
 query_result = embeddings.embed_query(docs[0].page_content)
-print(query_result)
+# print(query_result)
 
-## Store 
+from langchain_pinecone import PineconeVectorStore
+index_name = "index"
+docsearch = PineconeVectorStore.from_documents(docs, embeddings, index_name=index_name)
 
 
-# print(embeddings)
-
-# from langchain_pinecone import PineconeVectorStore
-# index_name = "langchain-test-index"
-# docsearch = PineconeVectorStore.from_documents(docs, embeddings, index_name=index_name)
-
+# vector similarity search
 # query = "What is the company mission?"
-# docs = docsearch.similarity_search(query)
-# print(docs[1].page_content)
+# result  = docsearch.similarity_search(query)
+# print(result [0].page_content)
+
+
